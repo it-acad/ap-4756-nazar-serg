@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ book.name }}</title>
+</head>
+<body>
+    <h1>{{ book.name }}</h1>
+    <p><strong>ID:</strong> {{ book.id }}</p>
+    <p><strong>Description:</strong> {{ book.description }}</p>
+    <p><strong>Count:</strong> {{ book.count }}</p>
+
+    {% if book.count > 0 %}
+        <form action="{% url 'create_order' book.id %}" method="post" style="margin: 15px 0;">
+            {% csrf_token %}
+            <button type="submit">Order Book</button>
+        </form>
+    {% else %}
+        <p style="color: red;"><strong>Out of stock</strong></p>
+    {% endif %}
+
+    <h3>Authors:</h3>
+    <ul>
+        {% for author in book.authors.all %}
+            <li>{{ author.name }} {{ author.surname }}</li>
+        {% empty %}
+            <li>No authors listed for this book.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'book_list' %}">Back to all books</a>
+</body>
+</html>

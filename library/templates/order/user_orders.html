@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Orders</title>
+</head>
+<body>
+    <h1>My Orders</h1>
+    <ul>
+        {% for order in orders %}
+            <li>
+                <strong>{{ order.book.name }}</strong>
+                — Ordered: {{ order.created_at }}
+                | Planned return: {{ order.plated_end_at }}
+                {% if order.end_at %}
+                    <b style="color: green;">(Returned on {{ order.end_at }})</b>
+                {% else %}
+                    <b style="color: orange;">(In use)</b>
+                {% endif %}
+            </li>
+        {% empty %}
+            <li>You have no orders yet.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'book_list' %}">Back to Catalog</a>
+</body>
+</html>

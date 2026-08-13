@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>All Orders</title>
+</head>
+<body>
+    <h1>All Orders</h1>
+    <table border="1" cellpadding="5">
+        <tr>
+            <th>ID</th>
+            <th>User ID</th>
+            <th>Book</th>
+            <th>Created At</th>
+            <th>Planned Return</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.user.id }}</td>
+            <td>{{ order.book.name }}</td>
+            <td>{{ order.created_at }}</td>
+            <td>{{ order.plated_end_at }}</td>
+            <td>
+                {% if order.end_at %}
+                    Closed ({{ order.end_at }})
+                {% else %}
+                    Active
+                {% endif %}
+            </td>
+            <td>
+                {% if not order.end_at %}
+                    <form method="POST" action="{% url 'close_order' order.id %}">
+                        {% csrf_token %}
+                        <button type="submit">Close Order</button>
+                    </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">No orders found.</td></tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

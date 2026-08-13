@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Books for User #{{ target_user.id }}</title>
+</head>
+<body>
+    <h1>Books provided to user: {{ target_user.first_name }} {{ target_user.last_name }} (ID: {{ target_user.id }})</h1>
+
+    <ul>
+        {% for book in books %}
+            <li>
+                <a href="{% url 'book_detail' book.id %}">{{ book.name }}</a>
+            </li>
+        {% empty %}
+            <li>No books provided to this user yet.</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'book_list' %}">Back to book list</a>
+</body>
+</html>

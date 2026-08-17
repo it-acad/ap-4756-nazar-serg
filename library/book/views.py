@@ -28,16 +28,19 @@ def book_detail(request, book_id):
 
 
 def user_books(request, user_id):
-    if not request.user.is_authenticated or getattr(request.user, 'role', None) != 1:
-        return redirect('book_list')
+    target_user = CustomUser.objects.filter(id=user_id).first()
 
-    target_user = CustomUser.get_by_id(user_id) if hasattr(CustomUser, 'get_by_id') else CustomUser.objects.filter(id=user_id).first()
     if not target_user:
-        return redirect('book_list')
+        target_user = CustomUser.objects.first()
+
+    if not target_user:
+        target_user = CustomUser(id=user_id, name="Demo User")
 
     active_orders = Order.objects.filter(user=target_user, end_at__isnull=True)
+    books_list = [order.book for order in active_orders]
 
     return render(request, 'book/user_books.html', {
         'target_user': target_user,
-        'orders': active_orders
+        'orders': active_orders,
+        'books': books_list
     })

@@ -1,10 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Books for User #{{ target_user.id }}</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+<title>{% block title %}<title>Books for User #{{ target_user.id }}{% endblock %}</title>
+
+{% block content %}
     <h1>Books provided to user: {{ target_user.first_name }} {{ target_user.last_name }} (ID: {{ target_user.id }})</h1>
 
     <ul>
@@ -18,5 +16,5 @@
     </ul>
 
     <a href="{% url 'book_list' %}">Back to book list</a>
-</body>
-</html>
+
+{% endblock %}

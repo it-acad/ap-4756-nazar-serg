@@ -1,44 +1,50 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from datetime import timedelta
 from .models import Order
 from book.models import Book
-from authentication.models import CustomUser
 
 
 def order_list(request):
-    # if not request.user.is_authenticated or getattr(request.user, 'role', None) != 1:
-    #     return redirect('book_list')
+    if not request.user.is_authenticated or getattr(request.user, 'role', None) != 1:
+        return redirect('book_list')
 
     orders = Order.get_all()
     return render(request, 'order/order_list.html', {'orders': orders})
 
 
 def user_orders(request):
-    dummy_user = CustomUser.objects.first()
+    if not request.user.is_authenticated:
+        return redirect('book_list')
 
-    orders = Order.objects.filter(user=dummy_user).order_by('-created_at') if dummy_user else []
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'order/user_orders.html', {'orders': orders})
 
 
 def create_order(request, book_id):
-    # if not request.user.is_authenticated:
-    #     return redirect('book_list')
-
     if request.method == 'POST':
-        book = Book.get_by_id(book_id)
-        dummy_user = CustomUser.objects.first()
+        book = get_object_or_404(Book, id=book_id)
+        user = request.user if request.user.is_authenticated else CustomUser.objects.first()
 
-        if book and dummy_user:
-            plated_end_at = timezone.now() + timedelta(days=14)
-            Order.create(user=dummy_user, book=book, plated_end_at=plated_end_at)
+        if book.count > 0:
+            # Планируемая дата возврата = текущее время + 14 дней
+            planned_date = timezone.now() + timedelta(days=14)
 
-    return redirect('user_orders')
+            Order.objects.create(
+                user=user,
+                book=book,
+                plated_end_at=planned_date  # Передаем обязательное поле
+            )
+
+            book.count -= 1
+            book.save()
+
+        return redirect('book_detail', book_id=book.id)
 
 
 def close_order(request, order_id):
-    # if not request.user.is_authenticated or getattr(request.user, 'role', None) != 1:
-    #     return redirect('book_list')
+    if not request.user.is_authenticated or getattr(request.user, 'role', None) != 1:
+        return redirect('book_list')
 
     if request.method == 'POST':
         order = Order.get_by_id(order_id)

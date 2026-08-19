@@ -1,33 +1,114 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>{{ book.name }}</title>
-</head>
-<body>
-    <h1>{{ book.name }}</h1>
-    <p><strong>ID:</strong> {{ book.id }}</p>
-    <p><strong>Description:</strong> {{ book.description }}</p>
-    <p><strong>Count:</strong> {{ book.count }}</p>
+{% extends 'base.html' %}
 
-    {% if book.count > 0 %}
-        <form action="{% url 'create_order' book.id %}" method="post" style="margin: 15px 0;">
-            {% csrf_token %}
-            <button type="submit">Order Book</button>
-        </form>
-    {% else %}
-        <p style="color: red;"><strong>Out of stock</strong></p>
-    {% endif %}
+{% block content %}
+<div class="container my-5">
+    <div class="row g-4">
 
-    <h3>Authors:</h3>
-    <ul>
-        {% for author in book.authors.all %}
-            <li>{{ author.name }} {{ author.surname }}</li>
-        {% empty %}
-            <li>No authors listed for this book.</li>
-        {% endfor %}
-    </ul>
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body p-4 d-flex flex-column">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="badge bg-secondary">Book ID: #{{ book.id }}</span>
+                        <span class="badge bg-light text-dark border">In stock: {{ book.count }}</span>
+                    </div>
 
-    <a href="{% url 'book_list' %}">Back to all books</a>
-</body>
-</html>
+                    <h1 class="h2 fw-bold text-primary mb-3">{{ book.name }}</h1>
+
+                    <div class="mb-4">
+                        <h6 class="text-uppercase text-muted fw-bold small">Authors</h6>
+                        <div class="d-flex flex-wrap gap-2 mt-1">
+                            {% for author in book.authors.all %}
+                            <a href="{% url 'author_detail' author.id %}" class="btn btn-sm btn-outline-secondary">
+                                👤 {{ author.name }} {{ author.surname }}
+                            </a>
+                            {% empty %}
+                            <span class="text-muted fst-italic small">No authors listed</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4 flex-grow-1">
+                        <h6 class="text-uppercase text-muted fw-bold small">Description</h6>
+                        <p class="card-text text-secondary lh-base mt-1">
+                            {{ book.description|default:"No description provided." }}
+                        </p>
+                    </div>
+
+                    <div>
+                        <a href="{% url 'book_list' %}" class="btn btn-link text-decoration-none p-0">
+                            ← Back to all books
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 bg-light h-100">
+                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-3">Order & Issue Status</h5>
+                        <hr>
+
+                        <div class="mb-4">
+                            {% if book.count > 0 %}
+                            <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
+                                <div>Available for instant issue</div>
+                            </div>
+                            <form action="{% url 'create_order' book.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary w-100 btn-lg fw-semibold shadow-sm">
+                                    Order Book Now
+                                </button>
+                            </form>
+                            {% else %}
+                            <div class="alert alert-danger mb-3" role="alert">
+                                Currently out of stock
+                            </div>
+                            <button class="btn btn-secondary w-100 btn-lg" disabled>
+                                Unavailable
+                            </button>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <h6 class="text-uppercase text-muted fw-bold small mb-2">Current Active Orders</h6>
+                            <div class="list-group list-group-flush rounded border">
+
+                                {% for order in book.order_set.all %}
+                                {% if not order.end_at %}
+                                <div class="list-group-item d-flex justify-content-between align-items-center bg-white py-2">
+                                    <div>
+                                        <small class="d-block fw-semibold text-dark">
+                                            User: #{{ order.user.id }}
+                                            {% if order.user.name %}
+                                            ({{ order.user.name }})
+                                            {% endif %}
+                                        </small>
+                                        <small class="text-muted">
+                                            Issued: {{ order.created_at|date:"Y-m-d H:i" }}
+                                        </small>
+                                    </div>
+                                    <span class="badge bg-warning text-dark">Active</span>
+                                </div>
+                                {% endif %}
+                                {% empty %}
+                                <div class="list-group-item text-muted text-center py-3 small">
+                                    No active issues for this book at the moment.
+                                </div>
+                                {% endfor %}
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top text-center text-muted small">
+                        Dynamic data updates in real-time.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

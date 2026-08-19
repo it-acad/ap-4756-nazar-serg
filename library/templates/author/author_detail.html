@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body p-4">
+            <span class="badge bg-secondary mb-2">Author ID: #{{ author.id }}</span>
+            <h2 class="card-title fw-bold text-primary">
+                {{ author.surname }} {{ author.name }} {{ author.patronymic }}
+            </h2>
+        </div>
+    </div>
+
+    <h4 class="fw-bold mb-3">Books by this author</h4>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for book in author.books.all %}
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-primary">{{ book.name }}</h5>
+                        <p class="card-text text-muted flex-grow-1">
+                            {{ book.description|default:"Description missing"|truncatewords:15 }}
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="badge bg-light text-dark border">In stock: {{ book.count }}</span>
+                            {% if book.id %}
+                                <a href="{% url 'book_detail' book.id %}" class="btn btn-sm btn-outline-primary">
+                                    Read more →
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">
+                    This author has no registered books yet.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="mt-4">
+        <a href="{% url 'author_list' %}" class="btn btn-secondary">← Back to all authors</a>
+    </div>
+</div>
+{% endblock %}

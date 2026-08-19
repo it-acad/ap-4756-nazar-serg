@@ -1,27 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>My Orders</title>
-</head>
-<body>
-    <h1>My Orders</h1>
-    <ul>
-        {% for order in orders %}
-            <li>
-                <strong>{{ order.book.name }}</strong>
-                — Ordered: {{ order.created_at }}
-                | Planned return: {{ order.plated_end_at }}
-                {% if order.end_at %}
-                    <b style="color: green;">(Returned on {{ order.end_at }})</b>
-                {% else %}
-                    <b style="color: orange;">(In use)</b>
-                {% endif %}
-            </li>
-        {% empty %}
-            <li>You have no orders yet.</li>
-        {% endfor %}
-    </ul>
-    <a href="{% url 'book_list' %}">Back to Catalog</a>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h1 class="h2 fw-bold text-primary mb-0">{{ book.name }}</h1>
+                        <span class="badge bg-secondary fs-6">ID: #{{ book.id }}</span>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-dark">Description</h5>
+                        <p class="card-text text-muted">
+                            {{ book.description|default:"No description available." }}
+                        </p>
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between bg-light p-3 rounded mb-4">
+                        <div>
+                            <span class="fw-bold me-2">Availability:</span>
+                            {% if book.count > 0 %}
+                                <span class="badge bg-success">{{ book.count }} in stock</span>
+                            {% else %}
+                                <span class="badge bg-danger">Out of stock</span>
+                            {% endif %}
+                        </div>
+
+                        {% if book.count > 0 %}
+                            <form action="{% url 'create_order' book.id %}" method="post" class="m-0">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                                    Order Book
+                                </button>
+                            </form>
+                        {% else %}
+                            <button class="btn btn-secondary px-4" disabled>
+                                Unavailable
+                            </button>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold text-dark mb-3">Authors</h5>
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for author in book.authors.all %}
+                                <a href="{% url 'author_detail' author.id %}" class="badge bg-white text-dark border text-decoration-none p-2 shadow-sm">
+                                    👤 {{ author.name }} {{ author.surname }}
+                                </a>
+                            {% empty %}
+                                <p class="text-muted fst-italic">No authors listed for this book.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div>
+                        <a href="{% url 'book_list' %}" class="btn btn-outline-secondary">
+                            ← Back to all books
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
